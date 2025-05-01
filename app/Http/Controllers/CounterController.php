@@ -13,7 +13,8 @@ class CounterController extends Controller
      */
     public function index()
     {
-        //
+        $counters = Counter::all();
+        return response()->json($counters);
     }
 
     /**

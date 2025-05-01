@@ -37,7 +37,6 @@
 
         </div>
 
-        <!-- Counter list -->
         <ul id="counters-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
             @foreach ($counters as $counter)
                 <li data-id="{{ $counter->id }}" class="counter-item bg-white p-4 shadow rounded flex flex-col justify-between">
@@ -55,28 +54,9 @@
 
     </div>
 
-
-
-
-
-
-    <!-- Error Display -->
     <div id="error-msg" class="text-red-600 mb-3 hidden"></div>
 
     <script>
-        function htmlNewCounter(counter) {
-            return `
-                <li data-id="${counter.id}" class="counter-item bg-white p-4 shadow rounded flex flex-col justify-between">
-            <span class="counter-text mb-2 font-semibold">${counter.name} — ${counter.number}</span>
-            <div class="flex gap-2 mt-auto">
-                <button class="edit-btn flex-1 bg-blue-100 text-blue-700 rounded px-2 py-1">Edit</button>
-                <button class="delete-btn flex-1 bg-red-100 text-red-700 rounded px-2 py-1">🗑️</button>
-                <button class="decrement-btn flex-1 bg-yellow-100 text-yellow-700 rounded px-2 py-1">➖</button>
-                <button class="plus-btn flex-1 bg-green-100 text-green-700 rounded px-2 py-1">➕</button>
-            </div>
-        </li>
-            `;
-        }
         $('#create-counter-form').on('submit', function (e) {
         e.preventDefault();
         $('#error-msg').addClass('hidden').text('');
@@ -205,6 +185,76 @@
         });
     });
 
+    function htmlNewCounter(counter) {
+        return `
+            <li data-id="${counter.id}" class="counter-item bg-white p-4 shadow rounded flex flex-col justify-between">
+                <span class="counter-text mb-2 font-semibold">${counter.name} — ${counter.number}</span>
+                <div class="flex gap-2 mt-auto">
+                    <button class="edit-btn flex-1 bg-blue-100 text-blue-700 rounded px-2 py-1">Edit</button>
+                    <button class="delete-btn flex-1 bg-red-100 text-red-700 rounded px-2 py-1">🗑️</button>
+                    <button class="decrement-btn flex-1 bg-yellow-100 text-yellow-700 rounded px-2 py-1">➖</button>
+                    <button class="plus-btn flex-1 bg-green-100 text-green-700 rounded px-2 py-1">➕</button>
+                </div>
+            </li>
+        `;
+    }
+
+    function updateCountersList(counters) {
+        const $listItems = $('#counters-list li');
+        const currentMap = {};
+
+        // Build a map of current counters by ID
+        $listItems.each(function () {
+            const id = $(this).data('id');
+            const text = $(this).find('.counter-text').text();
+            const [name, numberStr] = text.split(' — ');
+            currentMap[id] = {
+                name: name.trim(),
+                number: parseInt(numberStr.trim(), 10)
+            };
+        });
+
+        let hasChanged = false;
+
+        if (Object.keys(currentMap).length !== counters.length) {
+            hasChanged = true;
+        } else {
+            for (const counter of counters) {
+                const current = currentMap[counter.id];
+                if (!current || current.name !== counter.name || current.number !== counter.number) {
+                    hasChanged = true;
+                    break;
+                }
+            }
+        }
+
+        if (hasChanged) {
+            let html = '';
+            counters.forEach(counter => {
+                html += htmlNewCounter(counter);
+            });
+            $('#counters-list').html(html);
+        }
+    }
+
+
+    function fetchCounters() {
+        $.ajax({
+            url: '{{ route("counters.index") }}',
+            method: 'GET',
+            success: function (data) {
+                console.log("fetch data:", data);
+                updateCountersList(data);
+            },
+            error: function () {
+                console.warn('Failed to fetch counters');
+            }
+        });
+    }
+
+    const fetchDelay = '{{ env("FETCH_DELAY", 10000) }}'; // Fallback to 10000ms if not set
+
+    setInterval(fetchCounters, fetchDelay);
 
 </script>
 </body>
