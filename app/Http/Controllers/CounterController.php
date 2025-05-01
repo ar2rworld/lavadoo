@@ -95,6 +95,7 @@ class CounterController extends Controller
         if ($counter) {
             $counter->name = $validated['name'];
             $counter->save();
+            $counter->updated_at = now();
 
             return response()->json($counter);
         }
@@ -105,6 +106,7 @@ class CounterController extends Controller
 
     public function destroy(Counter $counter)
     {
+        $counter->deleted_at = now();
         $counter->delete();
         return response()->json(['success' => true]);
     }
