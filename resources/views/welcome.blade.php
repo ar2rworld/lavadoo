@@ -65,6 +65,7 @@
             url: '{{ route("counters.store") }}',
             method: 'POST',
             data: {
+                id: 0,
                 name: $('#name').val(),
                 number: $('#number').val(),
                 _token: '{{ csrf_token() }}'
