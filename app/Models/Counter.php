@@ -9,5 +9,5 @@ class Counter extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['number', 'name', 'deleted'];
+    protected $fillable = ['id', 'number', 'name', 'deleted'];
 }
