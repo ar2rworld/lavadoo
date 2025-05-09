@@ -36,6 +36,7 @@ class CounterController extends Controller
         ]);
 
         $counter = Counter::create([
+            'id' => 0,
             'number' => $validated['number'],
             'name' => $validated['name'],
             'deleted' => false,
